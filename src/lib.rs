@@ -1,7 +1,6 @@
 extern crate slab;
 use std::collections::VecDeque;
 use std::ops::{Index, IndexMut};
-use std::fmt::Debug;
 
 use slab::Slab;
 
@@ -23,12 +22,12 @@ impl Pointer {
     }
 }
 
-pub struct Tree<T: PartialOrd + Debug> {
+pub struct Tree<T: PartialOrd> {
     nodes: Slab<Node<T>>,
     root: Pointer
 }
 
-struct Node<T: PartialOrd + Debug> {
+struct Node<T: PartialOrd> {
     color: Color,
     parent: Pointer,
     left: Pointer,
@@ -37,12 +36,12 @@ struct Node<T: PartialOrd + Debug> {
 }
 
 // Just for convenience, so that we can type `self[i]` instead of `self.slab[i]`.
-impl<T> IndexMut<Pointer> for Tree<T> where T: PartialOrd + Debug {
+impl<T> IndexMut<Pointer> for Tree<T> where T: PartialOrd {
     fn index_mut(&mut self, index: Pointer) -> &mut Node<T> {
         &mut self.nodes[index.0]
     }
 }
-impl<T> Index<Pointer> for Tree<T> where T: PartialOrd + Debug {
+impl<T> Index<Pointer> for Tree<T> where T: PartialOrd {
     type Output = Node<T>;
 
     fn index(&self, index: Pointer) -> &Node<T> {
@@ -50,7 +49,7 @@ impl<T> Index<Pointer> for Tree<T> where T: PartialOrd + Debug {
     }
 }
 
-impl<T> Tree<T> where T: PartialOrd + Debug {
+impl<T> Tree<T> where T: PartialOrd {
     pub fn new() -> Tree<T> {
         Tree {
             nodes: Slab::new(),
@@ -315,7 +314,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
     }
 
     fn find_node(&self, value: T) -> Pointer {
-        fn find_node_at<T>(tree: &Tree<T>, value: T, at: Pointer) -> Pointer where T: PartialOrd + Debug {
+        fn find_node_at<T>(tree: &Tree<T>, value: T, at: Pointer) -> Pointer where T: PartialOrd {
             if at.is_null() {
                 return Pointer::null();
             }
@@ -335,7 +334,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
     }
 
     fn insert_at(&mut self, value: T, at: Pointer) -> Pointer {
-        fn create_node<T>(value: T, parent: Pointer) -> Node<T> where T: PartialOrd + Debug {
+        fn create_node<T>(value: T, parent: Pointer) -> Node<T> where T: PartialOrd {
             Node {
                 color: Color::RED,
                 parent: parent,
@@ -589,7 +588,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
     }
 
     pub fn in_order<F>(&self, mut f: F) where F: FnMut(&T) -> () {
-        fn in_order_at<F, T>(tree: &Tree<T>, f: &mut F, at: Pointer) where F: FnMut(&T) -> (), T: PartialOrd + Debug {
+        fn in_order_at<F, T>(tree: &Tree<T>, f: &mut F, at: Pointer) where F: FnMut(&T) -> (), T: PartialOrd {
             if at.is_null() {
                 return;
             }
@@ -603,7 +602,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
     }
 
     pub fn depth(&self) -> usize {
-        fn depth_inner<T>(tree: &Tree<T>, at: Pointer, depth: usize) -> usize where T: PartialOrd + Debug {
+        fn depth_inner<T>(tree: &Tree<T>, at: Pointer, depth: usize) -> usize where T: PartialOrd {
             if at.is_null() {
                 return depth;
             }
@@ -631,7 +630,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
             right: Box<Option<NodePrintData>>
         }
 
-        fn merge_node_print_data<F, T>(left: NodePrintData, right: NodePrintData, node: &Node<T>, to_string: &F) -> NodePrintData where F: Fn(&T) -> String, T: PartialOrd + Debug {
+        fn merge_node_print_data<F, T>(left: NodePrintData, right: NodePrintData, node: &Node<T>, to_string: &F) -> NodePrintData where F: Fn(&T) -> String, T: PartialOrd {
             let value = to_string(&node.value);
             return NodePrintData {
                 space_left: left.space_left + left.node_width + left.space_right,
@@ -647,7 +646,7 @@ impl<T> Tree<T> where T: PartialOrd + Debug {
             };
         }
 
-        fn node_print_data_from_tree<F, T>(tree: &Tree<T>, at: Pointer, to_string: &F, depth: usize) -> NodePrintData where F: Fn(&T) -> String, T: PartialOrd + Debug {
+        fn node_print_data_from_tree<F, T>(tree: &Tree<T>, at: Pointer, to_string: &F, depth: usize) -> NodePrintData where F: Fn(&T) -> String, T: PartialOrd {
             if at == Pointer::null() || depth > 6 {
                 NodePrintData {
                     space_left: 0,
